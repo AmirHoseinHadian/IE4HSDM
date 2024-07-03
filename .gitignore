@@ -1,5 +1,11 @@
-### AL ###
-#Template for AL projects for Dynamics 365 Business Central
+*.egg-info/
+.DS_Store
+.ipynb_checkpoints/
+__pycache__/
+dist/
+build/
+.idea
+
 #launch.json folder
 .vscode/
 #Cache folder
