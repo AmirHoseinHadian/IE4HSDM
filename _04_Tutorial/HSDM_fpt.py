@@ -1,9 +1,6 @@
 import numpy as np
 
-from mpmath import besseljzero
-
-from scipy.special import gamma
-from scipy.special import jv, iv
+from scipy.special import ive, iv
 from scipy.interpolate import interp1d
 
 def k(a, da, t, q, sigma=2):
@@ -27,7 +24,7 @@ def psi(a, da, t, z, tau, q, sigma=2):
     
     return term1 * term2 * (term3 * term4 + term5)
 
-def ie_bessel_fpt(a, da, q, z, sigma=2, dt=0.1, T_max=2):
+def fpt(a, da, q, z, sigma=2, dt=0.1, T_max=2):
     g = [0]
     T = [0]
     g.append(-2*psi(a, da, dt, z, 0, q, sigma))
@@ -37,6 +34,9 @@ def ie_bessel_fpt(a, da, q, z, sigma=2, dt=0.1, T_max=2):
         s = -2 * psi(a, da, n*dt, z, 0, q, sigma)
 
         for j in range(1, n):
+            if a(j*dt) == 0:
+                continue
+            
             s += 2 * dt * g[j] * psi(a, da, n*dt, a(j*dt), j*dt, q, sigma)
 
         g.append(s)
@@ -47,13 +47,3 @@ def ie_bessel_fpt(a, da, q, z, sigma=2, dt=0.1, T_max=2):
     
     gt = interp1d(T, g)
     return gt
-
-def series_bessel_fpt(t, a=1, sigma=1, nu=0, n=100):
-    zeros = np.asarray([float(besseljzero(nu, i+1)) for i in range(n)])
-    fpt = np.zeros(t.shape)
-    
-    for i in range(t.shape[0]):
-        series = np.sum((zeros**(nu+1)/jv(nu+1, zeros)) * np.exp(-(zeros**2 * sigma**2)/(2*a**2)*t[i]))
-        fpt[i] = sigma**2/(2**nu * a**2 * gamma(nu + 1)) * series
-        
-    return interp1d(t, fpt)
